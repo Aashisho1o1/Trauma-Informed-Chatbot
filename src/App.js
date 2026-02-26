@@ -12,9 +12,9 @@ import GroundMeButton from './components/GroundMeButton';
 import LanguageSelector from './components/LanguageSelector';
 
 function App() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [userPreferences, setUserPreferences] = useState({
-    language: 'en',
+    language: i18n.language?.startsWith('es') ? 'es' : 'en',
     highContrast: false,
     largeText: false,
     reduceMotion: false,
@@ -22,7 +22,12 @@ function App() {
   });
 
   const updatePreferences = (newPrefs) => {
-    setUserPreferences({...userPreferences, ...newPrefs});
+    setUserPreferences((prevPreferences) => ({ ...prevPreferences, ...newPrefs }));
+  };
+
+  const handleLanguageChange = (lang) => {
+    updatePreferences({ language: lang });
+    i18n.changeLanguage(lang);
   };
 
   // Quick exit to a safe website
@@ -37,7 +42,7 @@ function App() {
       
       <LanguageSelector 
         currentLanguage={userPreferences.language} 
-        onLanguageChange={(lang) => updatePreferences({language: lang})} 
+        onLanguageChange={handleLanguageChange}
       />
       
       <Routes>

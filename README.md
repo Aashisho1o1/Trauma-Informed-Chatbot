@@ -1,98 +1,209 @@
-# Trauma-Informed Chatbot for Survivors
+# Trauma-Informed Support Chatbot: IBM-Focused LLM Modernization
 
-A survivor-centered, trauma-informed chatbot designed to provide support, resources, and reporting options for survivors of domestic violence, harassment, and sexual assault.
+This prototype modernizes a trauma-informed support chatbot from scripted decision trees to a guarded LLM architecture for safety-critical use.
 
-## Features
+## Why This Version Exists
 
-- **Trauma-Informed Design**: Prioritizes emotional safety, consent, and user control
-- **Multiple Pathways**: Options for anonymous reporting, seeking emotional support, or exploring options
-- **Accessibility Features**: Support for screen readers, large text, high contrast, multilingual support
-- **Consent Checkpoints**: Regular check-ins to ensure continued consent and comfort
-- **Safe Exit**: Quick escape options to keep users safe
-- **Grounding Exercises**: In-app tools for emotional regulation and grounding
-- **Voice Input/Output**: Optional features for those who prefer speaking over typing
-- **Emergency Resources**: One-tap access to crisis hotlines and resources
+This version is designed to demonstrate IBM-relevant skills:
+- Responsible AI implementation in a high-stakes domain
+- Prompt engineering for constrained LLM behavior
+- Multi-layer guardrail design
+- Crisis intent detection and routing
+- Adversarial evaluation with measurable pass/fail criteria
 
-## Privacy & Security
+## Core Safety Commitments (Preserved)
 
-This application was designed with survivor safety and privacy as the top priority:
+The original non-negotiable protections remain intact:
+- Safe exit controls
+- Consent checkpoints during conversation
+- Anonymous access
+- No cookies/tracking/analytics
+- No server-side conversation persistence
+- Session-only frontend memory
+- Emergency resource routing
 
-- Anonymous reporting options
-- No data stored beyond the session
-- No tracking or cookies
-- No user identification required
-- Easy exit to weather website for safety
-- Clear privacy policy and consent processes
+## System Architecture
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 14+ and npm 
-
-### Installation
-
-1. Clone the repository
-   ```
-   git clone https://github.com/your-organization/trauma-informed-chatbot.git
-   cd trauma-informed-chatbot
-   ```
-
-2. Install dependencies
-   ```
-   npm install
-   ```
-
-3. Start the development server
-   ```
-   npm start
-   ```
-
-4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-## Building for Production
-
-```
-npm run build
+```text
+User Message (client state only)
+  -> Consent checkpoint (frontend, existing)
+  -> POST /api/chat
+      -> Crisis detection (keyword + optional LLM classifier)
+          -> If crisis: immediate resource response
+      -> LLM generation (trauma-informed constrained prompt)
+      -> Guardrail filter
+          -> deterministic rules (blocked phrases/patterns)
+          -> optional LLM safety review
+      -> Safe response OR fallback response
+  -> Rendered in chat UI (with crisis visual treatment)
 ```
 
-This builds the app for production to the `build` folder, optimizing for best performance.
+## Request Lifecycle
 
-## Technology Stack
+1. Frontend collects user message and last conversation turns from in-memory React state.
+2. Frontend sends `message`, `conversationHistory`, `mode`, and `language` to backend.
+3. Backend runs crisis detection before generation.
+4. If no crisis, backend generates LLM response with strict trauma-informed system prompt.
+5. Backend applies post-generation guardrails.
+6. Backend returns either:
+   - approved LLM response
+   - safety fallback response
+   - crisis routing response
 
-- React.js for the front-end UI
-- React Router for navigation
-- i18next for internationalization
-- Web Speech API for voice features
-- CSS with accessibility features
+## API
 
-## Design Principles
+### `GET /api/health`
+Returns runtime health and model readiness.
 
-This chatbot follows these core principles:
+Example response:
+```json
+{
+  "status": "ok",
+  "uptime_seconds": 125,
+  "llm_ready": false,
+  "provider": "openai",
+  "models": {
+    "chat": "gpt-4o-mini",
+    "review": "gpt-4o-mini"
+  },
+  "timestamp": "2026-02-26T00:00:00.000Z"
+}
+```
 
-1. **Survivor Agency**: The survivor is in control of every step
-2. **Trauma-Informed**: Language and flow designed to avoid re-traumatizing users
-3. **Accessibility**: Designed for all users, including those with disabilities
-4. **Safety First**: Privacy and immediate exit options as top priority
-5. **Emotional Support**: Validation and grounding features throughout
+### `POST /api/chat`
 
-## Ethics
+Request body:
+```json
+{
+  "message": "string",
+  "conversationHistory": [
+    { "role": "user", "content": "..." },
+    { "role": "assistant", "content": "..." }
+  ],
+  "mode": "report | support | talk",
+  "language": "en | es"
+}
+```
 
-This project follows strict ethical guidelines for working with vulnerable populations:
+Response body:
+```json
+{
+  "response": "string",
+  "is_crisis": false,
+  "crisis_type": "immediate_danger | self_harm | acute_distress | none",
+  "guardrail_triggered": false,
+  "meta": {
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "fallback_used": false
+  }
+}
+```
 
-- No data harvesting or tracking
-- No monetization of survivor information
-- Clear consent process
-- Transparency in all operations
-- Regular consultations with survivor advocacy groups
+## Responsible AI Design
 
-## License
+### 1. Prompt-level controls
+The generation prompt encodes trauma-informed constraints:
+- no victim-blaming
+- no minimization
+- no direct legal/medical/therapeutic instructions
+- no abuser-confrontation guidance
+- no confidentiality overpromises
+- survivor agency language by default
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+### 2. Post-generation guardrails
+Every generated response is checked before display:
+- deterministic blocked phrases and regex patterns
+- optional LLM safety review for subtle harms
+- safe fallback message if unsafe or parsing fails
 
-## Acknowledgments
+### 3. Crisis-first routing
+Crisis detection runs before response generation:
+- deterministic keyword checks for obvious emergencies
+- optional LLM classifier for subtle crises
+- immediate escalation to emergency resources when crisis is detected
 
-- Survivor advocacy organizations who provided guidance
-- Trauma-informed design specialists
-- Open source contributors # AI-Ethical-CGU-Group-Six
-# AI-Ethical-CGU-Group-Six
+### 4. Fail-safe behavior
+- No API key: chatbot still responds with safe non-generative fallback
+- Runtime errors: chatbot returns trauma-informed fallback
+- No persistence: history remains in frontend memory only
+
+## Evaluation Methodology
+
+Evaluation uses adversarial test cases in `evaluation/test_cases.json` and runner `evaluation/run_eval.js`.
+
+Two modes are reported:
+- Deterministic layer (always available)
+- Full stack (deterministic + LLM checks, when `OPENAI_API_KEY` exists)
+
+Targets:
+- Deterministic pass rate >= 90%
+- Full stack pass rate >= 85%
+
+Categories include:
+- victim blaming
+- minimizing language
+- legal/medical directive advice
+- confidentiality overpromises
+- subtle abuser-contact suggestions
+- crisis detection false positives/negatives
+
+## Runbook
+
+## Prerequisites
+- Node.js 18+
+- npm
+
+## 1) Install client dependencies
+```bash
+npm install
+```
+
+## 2) Install server dependencies
+```bash
+cd server
+npm install
+cp .env.example .env
+# set OPENAI_API_KEY in server/.env for full LLM behavior
+cd ..
+```
+
+## 3) Start frontend
+```bash
+npm run start:client
+```
+
+## 4) Start backend
+```bash
+npm run start:server
+```
+
+## 5) Run evaluation suite
+```bash
+npm run eval:guardrails
+```
+
+## Troubleshooting
+- `LLM checks enabled: false`: set `OPENAI_API_KEY` in `server/.env`.
+- CORS errors: set `CLIENT_ORIGIN` in `server/.env` to frontend origin.
+- Speech input unavailable: browser may not support speech recognition APIs.
+
+## IBM Interview Talking Points
+
+- Built multi-layer safety controls: deterministic guardrails plus LLM safety review.
+- Used hybrid crisis detection with low-latency keyword matching and classifier fallback.
+- Encoded trauma-informed domain constraints directly into reusable prompt framework.
+- Added adversarial evaluation harness with measurable thresholds and failure reporting.
+- Prioritized fail-safe defaults and privacy-by-design (no server-side data retention).
+
+## Limitations and Next Steps
+
+Current prototype limitations:
+- Guardrail quality depends on model quality and prompt reliability
+- Regional hotline localization is US-centric
+- No authenticated clinician escalation pipeline
+
+Recommended next improvements:
+- Add structured red-team datasets by language/domain variant
+- Add provider adapter implementation for IBM watsonx
+- Add auditable safety telemetry without storing user content

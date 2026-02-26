@@ -52,8 +52,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:client": "react-scripts start",
+    "start:server": "node server/index.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "eval:guardrails": "node evaluation/run_eval.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

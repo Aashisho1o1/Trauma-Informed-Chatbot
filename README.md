@@ -1,30 +1,41 @@
-# Trauma-Informed Support Chatbot: IBM-Focused LLM Modernization
+# Trauma-Informed Support Chatbot (Personal Project)
 
-This prototype modernizes a trauma-informed support chatbot from scripted decision trees to a guarded LLM architecture for safety-critical use.
+This is a personal project focused on building a safer AI-assisted support experience for people navigating emotional distress, including trauma-related situations.
 
-## Why This Version Exists
+The core goal is simple: combine helpful conversation support with strict safety boundaries, privacy-first defaults, and clear escalation behavior for crisis scenarios.
 
-This version is designed to demonstrate IBM-relevant skills:
-- Responsible AI implementation in a high-stakes domain
-- Prompt engineering for constrained LLM behavior
-- Multi-layer guardrail design
-- Crisis intent detection and routing
-- Adversarial evaluation with measurable pass/fail criteria
+## Why I Built This
 
-## Branch Update Summary (`ibm-modernization`)
+I wanted to explore a practical question:
 
-Latest changes introduced in this branch:
-- Added a new Express backend in `server/` with `POST /api/chat` and `GET /api/health`.
-- Added layered safety controls: deterministic guardrails, optional LLM safety review, and crisis-first routing.
-- Added centralized prompt modules for generation, crisis classification, and safety review.
-- Added standardized crisis/fallback response modules and no-key fail-safe behavior.
-- Added adversarial evaluation harness in `evaluation/` with threshold-based pass/fail exit codes.
-- Updated frontend chat flow to call backend APIs, pass mode/language/history, and visually flag crisis responses.
-- Added root scripts for backend startup and evaluation execution.
+How do you design an AI chat experience that is supportive, but avoids causing additional harm in high-stakes conversations?
 
-## Core Safety Commitments (Preserved)
+To answer that, this project modernizes a scripted chatbot into a guarded LLM architecture with:
+- trauma-informed response constraints
+- crisis-first routing
+- layered safety checks
+- adversarial testing with measurable pass/fail thresholds
 
-The original non-negotiable protections remain intact:
+## Impact and Value (Plain Language)
+
+For a non-technical reviewer, the value of this project is:
+
+- Safer first response in hard moments: The chatbot is designed to avoid harmful phrasing and route users to emergency resources when risk signals appear.
+- Privacy by default: No account required, no analytics tracking, and no server-side storage of conversation history.
+- More consistent support language: Guardrails reduce risky, dismissive, or overconfident responses.
+- Testable safety quality: The system includes an evaluation suite that checks behavior against known unsafe patterns.
+
+This project is not a replacement for professional care. It is a safety-conscious support tool prototype.
+
+## Problem This Project Addresses
+
+Many AI chat experiences are optimized for usefulness, but not for emotional safety in sensitive contexts. In trauma-related conversations, poor wording can worsen distress.
+
+This project focuses on reducing that risk through explicit constraints and fail-safe behavior.
+
+## Core Safety Commitments
+
+The following protections are built into the design:
 - Safe exit controls
 - Consent checkpoints during conversation
 - Anonymous access
@@ -37,7 +48,7 @@ The original non-negotiable protections remain intact:
 
 ```text
 User Message (client state only)
-  -> Consent checkpoint (frontend, existing)
+  -> Consent checkpoint (frontend)
   -> POST /api/chat
       -> Crisis detection (keyword + optional LLM classifier)
           -> If crisis: immediate resource response
@@ -51,13 +62,13 @@ User Message (client state only)
 
 ## Request Lifecycle
 
-1. Frontend collects user message and last conversation turns from in-memory React state.
+1. Frontend collects user message and recent conversation turns from in-memory React state.
 2. Frontend sends `message`, `conversationHistory`, `mode`, and `language` to backend.
 3. Backend validates payload (`message` required, max length 2000, `mode` in `report|support|talk`, `language` in `en|es`).
 4. Backend runs crisis detection before generation.
-5. If no crisis, backend generates LLM response with strict trauma-informed system prompt.
+5. If no crisis, backend generates an LLM response with a strict trauma-informed system prompt.
 6. Backend applies post-generation guardrails.
-7. Backend returns either:
+7. Backend returns one of:
    - approved LLM response
    - safety fallback response
    - crisis routing response
@@ -192,7 +203,7 @@ Two modes are reported:
 Targets:
 - Deterministic pass rate >= 90%
 - Full stack pass rate >= 85%
-- Script exits with non-zero status when thresholds are not met (CI-friendly).
+- Script exits with non-zero status when thresholds are not met (CI-friendly)
 
 Categories include:
 - victim blaming
@@ -204,16 +215,16 @@ Categories include:
 
 ## Runbook
 
-## Prerequisites
+### Prerequisites
 - Node.js 18+
 - npm
 
-## 1) Install client dependencies
+### 1) Install client dependencies
 ```bash
 npm install
 ```
 
-## 2) Install server dependencies
+### 2) Install server dependencies
 ```bash
 cd server
 npm install
@@ -222,17 +233,17 @@ cp .env.example .env
 cd ..
 ```
 
-## 3) Start frontend
+### 3) Start frontend
 ```bash
 npm run start:client
 ```
 
-## 4) Start backend
+### 4) Start backend
 ```bash
 npm run start:server
 ```
 
-## 5) Run evaluation suite
+### 5) Run evaluation suite
 ```bash
 npm run eval:guardrails
 ```
@@ -252,26 +263,25 @@ Client (optional `.env` in repo root):
 - `REACT_APP_API_URL`: backend base URL (default `http://localhost:3001`)
 
 ## Troubleshooting
-- `LLM checks enabled: false`: set `OPENAI_API_KEY` in `server/.env`.
-- CORS errors: set `CLIENT_ORIGIN` in `server/.env` to frontend origin.
-- Speech input unavailable: browser may not support speech recognition APIs.
+- `LLM checks enabled: false`: set `OPENAI_API_KEY` in `server/.env`
+- CORS errors: set `CLIENT_ORIGIN` in `server/.env` to frontend origin
+- Speech input unavailable: browser may not support speech recognition APIs
 
-## IBM Interview Talking Points
+## What This Demonstrates
 
-- Built multi-layer safety controls: deterministic guardrails plus LLM safety review.
-- Used hybrid crisis detection with low-latency keyword matching and classifier fallback.
-- Encoded trauma-informed domain constraints directly into reusable prompt framework.
-- Added adversarial evaluation harness with measurable thresholds and failure reporting.
-- Prioritized fail-safe defaults and privacy-by-design (no server-side data retention).
+- Product thinking in a sensitive domain: balancing usefulness with harm reduction
+- Practical responsible AI patterns: prompt constraints + layered guardrails + fallback behavior
+- Backend and frontend integration with clear API contracts
+- Measurable quality approach using adversarial evaluation instead of subjective demos
 
 ## Limitations and Next Steps
 
 Current prototype limitations:
 - Guardrail quality depends on model quality and prompt reliability
-- Regional hotline localization is US-centric
+- Regional hotline localization is currently US-centric
 - No authenticated clinician escalation pipeline
 
 Recommended next improvements:
 - Add structured red-team datasets by language/domain variant
-- Add provider adapter implementation for IBM watsonx
+- Add provider adapters for additional LLM ecosystems
 - Add auditable safety telemetry without storing user content
